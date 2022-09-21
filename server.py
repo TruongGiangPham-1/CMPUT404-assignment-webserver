@@ -49,30 +49,37 @@ class MyWebServer(socketserver.BaseRequestHandler):
             isFavicon = True
             localPath = getPath(dataStrList[0])
             absPath = getFullPath(localPath)
-            print("abs path is ", absPath)
+            #print("abs path is ", absPath)
 
             status_code = 200
             reason_phrase = "OK"
             Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
             content_type = f'Content-Type: text/html; charset=UTF-8\r\n'
-            ResponseHeader = f""
 
             # both equivalent
 
             localPath = getPath(dataStrList[0])
             absPath = getFullPath(localPath)
-            fullFile = ""
+            msgContent = ""
 
             
             with open(absPath + "index.html") as file:
-                fullFile = file.read()
-                print(fullFile)
+                msgContent = file.read()
+                #print(msgContent)
+
+            l = len(msgContent.encode('utf-8'))
+            msgLength = f'Content-Length: {str(l)}\r\n'
+            ResponseHeader = f"{Status_Line}{content_type}{msgLength}\r\n{msgContent}"
+            #print(ResponseHeader)
             # no I will get the file
+            # append htmlcontent to the header
+
+            self.request.sendall(bytearray(ResponseHeader, 'utf-8'))
 
         
         # manually build the response header()
         # use sendall for headers + file content
-        self.request.sendall(bytearray("OK",'utf-8'))
+        #self.request.sendall(bytearray("OK",'utf-8'))
         # write("")
 """
 parse the request header to get the path
