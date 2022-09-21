@@ -1,6 +1,7 @@
 #  coding: utf-8 
 from logging.config import listen
 import socketserver
+import os
 
 # Copyright 2013 Abram Hindle, Eddie Antonio Santos
 # 
@@ -28,6 +29,8 @@ import socketserver
 # try: curl -v -X GET http://127.0.0.1:8080/
 
 
+
+
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
@@ -36,12 +39,63 @@ class MyWebServer(socketserver.BaseRequestHandler):
         dataString = self.data.decode("utf-8")
         # in linux, new line is \n only so becareful
         # .splitlines() split regardless of newline type
-        dataStrList = dataString.splitlines() 
-        
+        dataStrList = dataString.splitlines()  
+        isFavicon = False
+        # because they always senc favion request
         if "/favicon.ico" not in dataStrList[0]:
-            print(dataStrList)
+            #print(dataStrList)
+            #print("we got ", getPath(dataStrList[0]))
+            print ("Got a request of: %s\n" % self.data)
+            isFavicon = True
+            localPath = getPath(dataStrList[0])
+            absPath = getFullPath(localPath)
+            print("abs path is ", absPath)
 
+            status_code = 200
+            reason_phrase = "OK"
+            Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
+            content_type = f'Content-Type: text/html; charset=UTF-8\r\n'
+            ResponseHeader = f""
+
+            # both equivalent
+
+            localPath = getPath(dataStrList[0])
+            absPath = getFullPath(localPath)
+            fullFile = ""
+
+            
+            with open(absPath + "index.html") as file:
+                fullFile = file.read()
+                print(fullFile)
+            # no I will get the file
+
+        
+        # manually build the response header()
+        # use sendall for headers + file content
         self.request.sendall(bytearray("OK",'utf-8'))
+        # write("")
+"""
+parse the request header to get the path
+"""
+def getPath(requestStr: str) -> str:
+    # given "GET /deep/ Http...." return /deep/
+    listForm = requestStr.split(" ")
+    a = listForm[1]
+    return a
+
+"""
+using the path we got from getPath, we get abspath
+"""
+def getFullPath(localPath: str) -> str:
+    # note we gotta check if the local path is valid
+    # like /deep is bad /deep/ is good 
+    # maybe have the check in another function
+    currentDir = os.getcwd()
+    absPath = currentDir + "/www" + localPath
+    return absPath
+
+
+
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
