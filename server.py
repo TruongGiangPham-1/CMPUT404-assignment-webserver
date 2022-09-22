@@ -34,6 +34,8 @@ import os
 class MyWebServer(socketserver.BaseRequestHandler):
     
     def handle(self):
+        validDir  = ["/", "deep"]
+ 
         self.data = self.request.recv(1024).strip()
         #print ("Got a request of: %s\n" % self.data.decode("utf-8"))
         dataString = self.data.decode("utf-8")
@@ -53,11 +55,14 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 self.request.sendall(bytearray(respondingHeader, 'utf-8'))
                 return
 
+            
+            # Handle valid html file request like GET / or GET /deep/
+
             #print(dataStrList)
             #print("we got ", getPath(dataStrList[0]))
             print ("Got a request of: %s\n" % self.data)
             isFavicon = True
-            localPath = getPath(dataStrList[0])
+            localPath = getPath(dataStrList[0])  # this is / or /deep or /deep/
             absPath = getFullPath(localPath)
             #print("abs path is ", absPath)
 
@@ -72,7 +77,8 @@ class MyWebServer(socketserver.BaseRequestHandler):
             absPath = getFullPath(localPath)
             msgContent = ""
 
-            
+            #TODO: instead of hardcoding index.html, we find whatever html file in that directory
+            #  
             with open(absPath + "index.html") as file:
                 msgContent = file.read()
                 #print(msgContent)
@@ -91,7 +97,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # use sendall for headers + file content
         #self.request.sendall(bytearray("OK",'utf-8'))
         # write("")
+"""
+given absolute path to css filename   : ...../base.css for example
 
+
+"""
 def respondToCss(absPathOfCss):
     # make the response header?
     # open the file
