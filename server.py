@@ -43,6 +43,16 @@ class MyWebServer(socketserver.BaseRequestHandler):
         isFavicon = False
         # because they always senc favion request
         if "/favicon.ico" not in dataStrList[0]:
+            # check the case for request for base.css
+            if (".css" in dataStrList[0]):
+                # we need the full path to  ....../base.css
+                cssFileName = getPath(dataStrList[0])  # should return /base.css
+                absPathOfCSS = getFullPath(cssFileName)
+                respondingHeader = respondToCss(absPathOfCSS)
+
+                self.request.sendall(bytearray(respondingHeader, 'utf-8'))
+                return
+
             #print(dataStrList)
             #print("we got ", getPath(dataStrList[0]))
             print ("Got a request of: %s\n" % self.data)
@@ -81,6 +91,27 @@ class MyWebServer(socketserver.BaseRequestHandler):
         # use sendall for headers + file content
         #self.request.sendall(bytearray("OK",'utf-8'))
         # write("")
+
+def respondToCss(absPathOfCss):
+    # make the response header?
+    # open the file
+    # absPathOfCss = ....../base.css
+    status_code = 200
+    reason_phrase = "OK"
+    Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
+    content_type = f'Content-Type: text/css; charset=UTF-8\r\n'
+    cssContent = ""
+    with open(absPathOfCss) as file:
+        cssContent = file.read()
+
+    l = len(cssContent.encode('utf-8'))
+    msgLength = f'Content-Length: {str(l)}\r\n'
+    ResponseHeader = f"{Status_Line}{content_type}{msgLength}\r\n{cssContent}"
+    # the sigh
+    
+    #print("Response Hearing ", ResponseHeader)
+    return ResponseHeader
+
 """
 parse the request header to get the path
 """
