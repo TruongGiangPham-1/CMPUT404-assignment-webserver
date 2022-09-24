@@ -43,6 +43,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
         dataStrList = dataString.splitlines()  
         isFavicon = False
         # because they always senc favion request
+        print(dataStrList[0])
         if "/favicon.ico" not in dataStrList[0]:
             # check the case for request for base.css
             if (".css" in dataStrList[0]):
@@ -76,6 +77,11 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 return
             elif (ret == "OK file path"):
                 # here, localpath = "/.../___.html"
+                # open this 
+                absPath = getFullPath(localPath)  # should work
+                #:w
+                header = returnHtmlfile(localPath)
+                self.request.sendall(bytearray(header, 'utf-8'))
                 return
 
 
@@ -119,22 +125,25 @@ class MyWebServer(socketserver.BaseRequestHandler):
         #self.request.sendall(bytearray("OK",'utf-8'))
         # write("")
 
+
+
 def checkGETPath(localPath, requestMsg):
     # TODO: check if the localPath file exist in the directory
     # Loop invariant: local path = /.....
     # 1. check if the /deep is a valid directory
     # 2. if not then check if this is a valid path to directory
-
+    print("localpath", localPath)
     if ("GET" not in requestMsg):  # TODO: this should be at the very top
         return return405Header()
     print("in checkGET localpath is ", localPath)
     validPaths = {"/", "/deep/"}
     if (localPath[-1] != '/' and ".html" not in localPath):  # case: folder that  doesnt end with / 
         print()
-        print("301 error")
+        print("301 errorRRRRRRRRRRRR")
         print()  
-        return return301Header()
+        return return301Header(localPath)
     else:  # how to do it 
+        print("not 301")
         # here local path is /../.html(check if html is valid) or /folder/(check if folder is valid) 
         if (".html" in localPath):  # check if this path to html file exist
             flag = os.path.exists(getFullPath(localPath)) 
@@ -152,6 +161,22 @@ def checkGETPath(localPath, requestMsg):
             return return404Header()  # folder dont exist
     # else this path is fine
     return "OK path"
+def returnHtmlfile(localPath: str):
+    absPath = getFullPath(localPath)
+    status_code = 200
+    reason_phrase = "OK"
+    Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
+    content_type = f'Content-Type: text/html; charset=UTF-8\r\n'
+    with open(absPath) as file:
+        msgContent = file.read()
+        #print(msgContent)
+        l = len(msgContent.encode('utf-8'))
+        msgLength = f'Content-Length: {str(l)}\r\n'
+        ResponseHeader = f"{Status_Line}{content_type}{msgLength}\r\n{msgContent}"
+        #print(ResponseHeader)
+        # no I will get the file
+        # append htmlcontent to the header
+        return ResponseHeader
 
 def returnIndexHtml(localPath: str):
     status_code = 200
@@ -173,10 +198,12 @@ def returnIndexHtml(localPath: str):
 
         return ResponseHeader 
 
-def return301Header():
+def return301Header(localpath: str):
     #HTTP/1.1 301 Moved Permanently
     #Location: http://www.example.org/index.asp
-    location = "http://127.0.0.1:8080/deep/"
+    #location = "http://127.0.0.1:8080/deep/"  # TODO: this has to change
+    location = "http://127.0.0.1:8080" + localpath + "/"  # add / to correct directory
+    print("in 301, location is", location) 
     status_code = 301
     reason_phrase = "Moved Permanently"
     Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
