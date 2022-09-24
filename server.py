@@ -43,16 +43,23 @@ class MyWebServer(socketserver.BaseRequestHandler):
         dataStrList = dataString.splitlines()  
         isFavicon = False
         # because they always senc favion request
-        print(dataStrList[0])
+        #print(dataStrList[0])
         if "/favicon.ico" not in dataStrList[0]:
             # check the case for request for base.css
             if (".css" in dataStrList[0]):
                 # we need the full path to  ....../base.css
                 cssFileName = getPath(dataStrList[0])  # should return /base.css
-                absPathOfCSS = getFullPath(cssFileName)
-                respondingHeader = respondToCss(absPathOfCSS)
-
-                self.request.sendall(bytearray(respondingHeader, 'utf-8'))
+                print("css name is ", cssFileName)
+                ret = checkGETPath(cssFileName)
+                if (ret == "OK css path"):
+                    print("CSSSS OKKKKKK")
+                    absPathOfCSS = getFullPath(cssFileName)
+                    respondingHeader = respondToCss(absPathOfCSS)
+                    self.request.sendall(bytearray(respondingHeader, 'utf-8'))
+                else:  # sent 404 error
+                    print("CSSSS NOT OKKKKKK")
+                    print("css file dont exist`")
+                    self.request.sendall(bytearray(respondingHeader, 'utf-8'))
                 return
 
             
@@ -61,7 +68,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
 
             #print(dataStrList)
             #print("we got ", getPath(dataStrList[0]))
-            print ("Got a request of: %s\n" % self.data)
+            #print ("Got a request of: %s\n" % self.data)
             isFavicon = True
             localPath = getPath(dataStrList[0])  # this is / or /deep or /deep/
 
@@ -132,9 +139,19 @@ def checkGETPath(localPath, requestMsg):
     # Loop invariant: local path = /.....
     # 1. check if the /deep is a valid directory
     # 2. if not then check if this is a valid path to directory
+
     print("localpath", localPath)
     if ("GET" not in requestMsg):  # TODO: this should be at the very top
         return return405Header()
+
+    if (".css" in localPath):
+        flag = os.path.exists(getFullPath(localPath)) 
+        if (flag):
+            return "OK css path"
+        return return404Header()
+
+
+    
     print("in checkGET localpath is ", localPath)
     validPaths = {"/", "/deep/"}
     if (localPath[-1] != '/' and ".html" not in localPath):  # case: folder that  doesnt end with / 
