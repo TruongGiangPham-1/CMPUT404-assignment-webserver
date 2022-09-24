@@ -59,7 +59,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 else:  # sent 404 error
                     print("CSSSS NOT OKKKKKK")
                     print("css file dont exist`")
-                    self.request.sendall(bytearray(respondingHeader, 'utf-8'))
+                    self.request.sendall(bytearray(ret, 'utf-8'))
                 return
 
             
