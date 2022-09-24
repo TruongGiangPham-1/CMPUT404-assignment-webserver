@@ -50,7 +50,7 @@ class MyWebServer(socketserver.BaseRequestHandler):
                 # we need the full path to  ....../base.css
                 cssFileName = getPath(dataStrList[0])  # should return /base.css
                 print("css name is ", cssFileName)
-                ret = checkGETPath(cssFileName)
+                ret = checkGETPath(cssFileName, dataStrList[0])
                 if (ret == "OK css path"):
                     print("CSSSS OKKKKKK")
                     absPathOfCSS = getFullPath(cssFileName)
