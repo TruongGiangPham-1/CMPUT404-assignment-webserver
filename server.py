@@ -49,16 +49,16 @@ class MyWebServer(socketserver.BaseRequestHandler):
             if (".css" in dataStrList[0]):
                 # we need the full path to  ....../base.css
                 cssFileName = getPath(dataStrList[0])  # should return /base.css
-                print("css name is ", cssFileName)
+                #print("css name is ", cssFileName)
                 ret = checkGETPath(cssFileName, dataStrList[0])
                 if (ret == "OK css path"):
-                    print("CSSSS OKKKKKK")
+                    #print("CSSSS OKKKKKK")
                     absPathOfCSS = getFullPath(cssFileName)
                     respondingHeader = respondToCss(absPathOfCSS)
                     self.request.sendall(bytearray(respondingHeader, 'utf-8'))
                 else:  # sent 404 error
-                    print("CSSSS NOT OKKKKKK")
-                    print("css file dont exist`")
+                    #print("CSSSS NOT OKKKKKK")
+                    #print("css file dont exist`")
                     self.request.sendall(bytearray(ret, 'utf-8'))
                 return
 
@@ -140,7 +140,7 @@ def checkGETPath(localPath, requestMsg):
     # 1. check if the /deep is a valid directory
     # 2. if not then check if this is a valid path to directory
 
-    print("localpath", localPath)
+    #print("localpath", localPath)
     if ("GET" not in requestMsg):  # TODO: this should be at the very top
         return return405Header()
 
@@ -152,26 +152,26 @@ def checkGETPath(localPath, requestMsg):
 
 
     
-    print("in checkGET localpath is ", localPath)
+    #print("in checkGET localpath is ", localPath)
     validPaths = {"/", "/deep/"}
     if (localPath[-1] != '/' and ".html" not in localPath):  # case: folder that  doesnt end with / 
-        print()
-        print("301 errorRRRRRRRRRRRR")
-        print()  
+        #print()
+        #print("301 errorRRRRRRRRRRRR")
+        #print()  
         return return301Header(localPath)
     else:  # how to do it 
-        print("not 301")
+        #print("not 301")
         # here local path is /../.html(check if html is valid) or /folder/(check if folder is valid) 
         if (".html" in localPath):  # check if this path to html file exist
             flag = os.path.exists(getFullPath(localPath)) 
-            print()
-            print("requestedPath exist? ", flag)
-            print()
+            #print()
+            #print("requestedPath exist? ", flag)
+            #print()
             if (flag):
                 return "OK file path"
             return return404Header()  # case: path to .html file dont exist
         else:  # case requested path is /../folder/ to a valid folder format
-            print()
+            #print()
             flag = os.path.exists(getFullPath(localPath))
             if (flag):  # this folder exist
                 return "OK dir path"
@@ -220,7 +220,7 @@ def return301Header(localpath: str):
     #Location: http://www.example.org/index.asp
     #location = "http://127.0.0.1:8080/deep/"  # TODO: this has to change
     location = "http://127.0.0.1:8080" + localpath + "/"  # add / to correct directory
-    print("in 301, location is", location) 
+    #print("in 301, location is", location) 
     status_code = 301
     reason_phrase = "Moved Permanently"
     Status_Line = f'HTTP/1.1 {str(status_code)} {reason_phrase}\r\n'
@@ -246,7 +246,7 @@ def return405Header():
     l = len(msg.encode('utf-8'))
     msgLength = f'Content-Length: {str(l)}\r\n'
     ResponseHeader = f"{Status_Line}{msgLength}\r\n{msg}"
-    print(ResponseHeader)
+    #print(ResponseHeader)
     return ResponseHeader
 """
 given absolute path to css filename   : ...../base.css for example
