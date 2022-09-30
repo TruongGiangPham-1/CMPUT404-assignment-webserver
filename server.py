@@ -235,7 +235,7 @@ def return404Header():
     l = len(msg.encode('utf-8'))
     msgLength = f'Content-Length: {str(l)}\r\n'
     ResponseHeader = f"{Status_Line}{msgLength}\r\n{msg}"
-    print(ResponseHeader)
+    #print(ResponseHeader)
     return ResponseHeader
 
 def return405Header():
